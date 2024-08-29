@@ -18,10 +18,10 @@ type (
 func (e Event) EventName() string { return e.Name }
 
 func NewEvent(name string, payload EventPayload) Event {
-	return newEvent2(name, payload)
+	return newEvent(name, payload)
 }
 
-func newEvent2(name string, payload EventPayload) Event {
+func newEvent(name string, payload EventPayload) Event {
 	evt := Event{
 		Entity:     NewEntity(uuid.New().String(), name),
 		Payload:    payload,

@@ -7,28 +7,26 @@ import (
 	"log"
 	"payment-service/internal/domain"
 	"payment-service/internal/domain/events"
-	"payment-service/internal/infrastructure/gateways"
+	"payment-service/internal/infrastructure/processors"
 	"payment-service/pkg"
 )
 
 type EventWorker struct {
-	queue           pkg.Queue
-	deadLetterQueue pkg.Queue
-	eventStore      events.EventStore
-	gatewayFactory  gateways.GatewayFactoryInterface
+	queue            pkg.Queue
+	deadLetterQueue  pkg.Queue
+	processorFactory processors.EventProcessorFactoryInteface
 }
 
-func NewEventWorker(queue pkg.Queue, deadLetterQueue pkg.Queue, eventStore events.EventStore, gatewayFactory gateways.GatewayFactoryInterface) *EventWorker {
+func NewEventWorker(queue pkg.Queue, deadLetterQueue pkg.Queue, processorFactory processors.EventProcessorFactoryInteface) *EventWorker {
 	return &EventWorker{
-		queue:           queue,
-		deadLetterQueue: deadLetterQueue,
-		eventStore:      eventStore,
-		gatewayFactory:  gatewayFactory,
+		queue:            queue,
+		deadLetterQueue:  deadLetterQueue,
+		processorFactory: processorFactory,
 	}
 }
 
 func (w *EventWorker) Start(ctx context.Context) error {
-	for _, eventType := range []string{domain.DepositReceivedEvent /*domain.WithdrawRequestedEvent*/} {
+	for _, eventType := range []string{domain.DepositReceivedEvent /* add other events here */} {
 		if err := w.queue.Subscribe(eventType, func(message interface{}) error {
 			return w.processMessage(message.([]byte))
 		}); err != nil {
@@ -46,46 +44,16 @@ func (w *EventWorker) processMessage(message []byte) error {
 		return fmt.Errorf("failed to unmarshal base event: %w", err)
 	}
 
-	switch event.EventName() {
-	case domain.DepositReceivedEvent:
-		return w.processDepositReceived(event)
-	//case domain.WithdrawRequestedEvent:
-	//	return w.processWithdrawRequested(message)
-	default:
-		return fmt.Errorf("unknown event type: %s", event.EventName())
-	}
-}
-
-func (w *EventWorker) processDepositReceived(event events.Event) error {
-	payloadBytes, err := json.Marshal(event.Payload)
+	processor, err := w.processorFactory.GetProcessor(event.EventName())
 	if err != nil {
-		return fmt.Errorf("failed to marshal event payload: %w", err)
+		return w.handleFailure(event, fmt.Errorf("failed to get processor: %w", err))
 	}
 
-	var depositReceived domain.DepositReceived
-	if err := json.Unmarshal(payloadBytes, &depositReceived); err != nil {
-		return fmt.Errorf("failed to unmarshal DepositReceived event: %w", err)
+	if err := processor.Process(event); err != nil {
+		return w.handleFailure(event, fmt.Errorf("failed to process event: %w", err))
 	}
 
-	gateway, err := w.gatewayFactory.GetGateway(depositReceived.Gateway)
-	if err != nil {
-		return w.handleFailure(event, fmt.Errorf("unknown gateway: %s", depositReceived.Gateway))
-	}
-
-	_, err = gateway.Deposit(context.Background(), depositReceived.Amount, nil)
-
-	if err != nil {
-		return w.handleFailure(event, fmt.Errorf("failed to process deposit: %w", err))
-	}
-
-	depositProcessed := domain.DepositProcessed{
-		TransactionID: depositReceived.TransactionID,
-		Status:        domain.ProcessedStatus,
-		Gateway:       depositReceived.Gateway,
-	}
-	processedEvent := events.NewEvent(domain.DepositProcessedEvent, &depositProcessed)
-
-	return w.eventStore.SaveEvent(processedEvent)
+	return nil
 }
 
 func (w *EventWorker) handleFailure(baseEvent events.Event, err error) error {
