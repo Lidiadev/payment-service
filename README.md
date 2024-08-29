@@ -125,7 +125,7 @@ To add a new payment gateway:
 3. Register the new gateway in the GatewayFactory in main.go.
 
 ## Future Improvements
-- Implement Withdrawal and Callback
+- Implement the remaining functionality: Withdrawal and Callback
 - Process all types of events
 - Add more robust error handling
 - Process failed events
