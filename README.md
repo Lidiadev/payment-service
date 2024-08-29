@@ -146,4 +146,5 @@ To add a new payment gateway:
 - Add more robust error handling
 - Process failed events
 - Integrate with a DB and message broker
+- Decouple from `time.Now()` using the `utils.Providers` interface
 - Add more UTs and integration tests.
