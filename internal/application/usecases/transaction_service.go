@@ -35,7 +35,7 @@ func (s *TransactionService) HandleDepositCommand(ctx context.Context, cmd comma
 		TransactionID: uuid.New().String(),
 		Gateway:       cmd.GatewayID,
 	}
-	event := events.NewEvent2(domain.DepositReceivedEvent, &depositReceived) //,cmd.Details)
+	event := events.NewEvent(domain.DepositReceivedEvent, &depositReceived) //,cmd.Details)
 
 	if err := s.eventStore.SaveEvent(event); err != nil {
 		return nil, fmt.Errorf("failed to save DepositReceived event: %w", err)
