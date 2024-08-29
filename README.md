@@ -29,20 +29,26 @@ This payment gateway microservice is designed to integrate with multiple payment
 
 Run using Docker:
 
-```docker compose up --build```
+```
+docker compose up --build
+```
 
 3. Access the Swagger Documentation
 
 The API documentation is generated using Swaggo and is available at:
 
-```http://localhost:8080/swagger/index.html```
+```
+http://localhost:8080/swagger/index.html
+```
 
 
 ### Testing the Service
 
 Run unit tests:
 
-```go test ./...```
+```
+go test ./...
+```
 
 
 Note: The current implementation uses an in-memory queue and an in-memory db.
