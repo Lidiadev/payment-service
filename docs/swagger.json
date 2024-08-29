@@ -1,0 +1,96 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {},
+        "version": "v1",
+        "title": "Payment service"
+    },
+    "paths": {
+        "/v1/deposit": {
+            "post": {
+                "description": "This will deposit a specific amount into a user's account using a payment gateway.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deposits"
+                ],
+                "summary": "Deposit money into an account",
+                "parameters": [
+                    {
+                        "description": "Deposit Details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.DepositRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.DepositResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.DepositRequest": {
+            "type": "object",
+            "required": [
+                "customer_id",
+                "gateway_id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "customer_id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "details": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gateway_id": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "models.DepositResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
