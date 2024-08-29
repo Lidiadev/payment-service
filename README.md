@@ -3,17 +3,8 @@
 ### High-Level Architecture Overview
 This payment gateway microservice is designed to integrate with multiple payment gateways and manage deposits. The architecture follows clean architecture principles.
 
-#### Key components:
-
-- API Layer: Handles HTTP requests using the Gin framework.
-- Application Layer: Contains use cases and commands for business logic.
-- Domain Layer: Defines core business logic and entities.
-- Infrastructure Layer: Implements external interfaces (gateways, databases, etc.).
-- Gateway Factory: Allows easy integration of new payment gateways.
-- Resilience Patterns: Implements circuit breaker and retry mechanisms.
-
-## Event-Driven Architecture
-The microservice employs an event-driven architecture to enhance scalability, decouple components and improve fault tolerance. 
+## Events
+The microservice employs uses events to recorde each change into an append-only stream. 
 
 ### How It Works
 
@@ -31,22 +22,15 @@ The event processing flow in this microservice works as follows:
 - Calls the relevant method on the gateway (e.g., Deposit)
 - Based on the result, generates and publishes a new event (e.g., DepositProcessed or DepositFailed)
 
-
-3. **Concurrent Processing**: The worker can process multiple events concurrently, improving throughput.
-
 ### Failure Handling
 The system is designed to be resilient to failures at various levels:
 1. **Event Processing Failures**:
-- If an event fails to process, it's moved to a Dead Letter Queue (DLQ).
+- If an event fails to process, it's moved to a Dead Letter Queue.
 - The system logs the failure for monitoring and debugging.
-- Events in the DLQ can be retried later or manually processed.
+- Events in the DLQ can be retried later.
 
 2. **Gateway Failures**:
 - The system uses the Hystrix library for implementing the Circuit Breaker pattern.
-- If a gateway consistently fails, the circuit opens, preventing further calls to the failing gateway.
-- During this time, new requests are immediately rejected or routed to a fallback method.
-- After a cooldown period, the circuit half-opens to test if the gateway has recovered.
-- For transient failures, the system can retry operations with exponential backoff.
 
 
 3. System Crashes:
