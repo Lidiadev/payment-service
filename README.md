@@ -42,6 +42,8 @@ When an event is generated, it's saved to the event store using the SaveEvent me
 Each event includes metadata such as event type, timestamp, and associated data.
 For production use, we should ensure events are saved durably before acknowledging their receipt.
 
+In the events table, we could use a compound primary key for optimistic concurrency control. If two events come in at the same time for the same stream (id and name) and version, the second would encounter a conflict. The application could try to redo the command and try saving again or give up and return an error to the user.
+
 ## Resilience to Failures
 The microservice is designed to be resilient to various types of failures:
 
