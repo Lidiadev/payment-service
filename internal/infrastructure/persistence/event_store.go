@@ -23,7 +23,7 @@ func (s *InMemoryEventStore) SaveEvent(event events.Event) error {
 	defer s.mu.Unlock()
 	s.events = append(s.events, event)
 
-	//s.logger.Info("Event saved: " + string(events.Type))
+	s.logger.Info("Event saved: " + string(event.EventName()))
 
 	return nil
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 )
 
-// ConfigureHystrix globally sets up Hystrix defaults. TODO: move to a config file
+// TODO: move to a config file
 func ConfigureHystrix() {
 	hystrix.DefaultTimeout = 5000
 	hystrix.DefaultMaxConcurrent = 20
@@ -15,7 +15,6 @@ func ConfigureHystrix() {
 type HystrixConfig struct {
 	Name                   string
 	Timeout                int // Timeout in milliseconds
-	MaxConcurrentRequests  int // Max concurrent requests
 	ErrorPercentThreshold  int // Percentage of errors to open the circuit
 	RequestVolumeThreshold int // Minimum number of requests before the circuit can trip
 	SleepWindow            int // How long (in milliseconds) to wait after tripping before retrying
@@ -24,7 +23,6 @@ type HystrixConfig struct {
 func InitializeHystrixCommand(config HystrixConfig) {
 	hystrix.ConfigureCommand(config.Name, hystrix.CommandConfig{
 		Timeout:                config.Timeout,
-		MaxConcurrentRequests:  config.MaxConcurrentRequests,
 		ErrorPercentThreshold:  config.ErrorPercentThreshold,
 		RequestVolumeThreshold: config.RequestVolumeThreshold,
 		SleepWindow:            config.SleepWindow,

@@ -83,14 +83,12 @@ func (w *EventWorker) processDepositReceived(event events.Event) error {
 		Status:        domain.ProcessedStatus,
 		Gateway:       depositReceived.Gateway,
 	}
-	processedEvent := events.NewEvent2(domain.DepositProcessedEvent, &depositProcessed)
+	processedEvent := events.NewEvent(domain.DepositProcessedEvent, &depositProcessed)
 
 	return w.eventStore.SaveEvent(processedEvent)
 }
 
 func (w *EventWorker) handleFailure(baseEvent events.Event, err error) error {
-	//var failedEvent events.Event
-
 	log.Printf("Transaction failed: %s %v", baseEvent.Id, err)
 
 	err = w.deadLetterQueue.Publish(baseEvent.EventName(), baseEvent)
@@ -98,41 +96,5 @@ func (w *EventWorker) handleFailure(baseEvent events.Event, err error) error {
 		return err
 	}
 
-	//switch baseEvent.EventName() {
-	//case domain.DepositReceivedEvent:
-	//	depositReceived := domain.DepositFailed{
-	//		TransactionID: uuid.New().String(),
-	//		Reason:        err.Error(),
-	//	}
-	//	failedEvent = events.NewEvent2(domain.DepositFailedEvent, &depositReceived)
-	//	//failedEvent = domain.DepositFailed{
-	//	//	BaseEvent: domain.BaseEvent{
-	//	//		EventID:     generateUUID(),
-	//	//		AggregateId: baseEvent.AggregateID(),
-	//	//		OccurredAt:  time.Now(),
-	//	//		EventType:   domain.DepositFailedEvent,
-	//	//	},
-	//	//	Reason: err.Error(),
-	//	//}
-	////case domain.WithdrawRequestedEvent:
-	////	failedEvent = domain.WithdrawFailed{
-	////		BaseEvent: domain.BaseEvent{
-	////			EventID:     generateUUID(),
-	////			AggregateId: baseEvent.AggregateID(),
-	////			OccurredAt:  time.Now(),
-	////			EventType:   domain.WithdrawFailedEvent,
-	////		},
-	////		Reason: err.Error(),
-	////	}
-	//default:
-	//	return fmt.Errorf("unknown event type for failure handling: %s", baseEvent.EventName())
-	//}
-	//
-	//if err := w.eventStore.SaveEvent(failedEvent); err != nil {
-	//	return fmt.Errorf("failed to save failure event: %w", err)
-	//}
-	//
-	//log.Printf("Transaction failed: %v", err)
-	//return nil
 	return nil
 }

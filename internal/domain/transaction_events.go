@@ -8,8 +8,6 @@ const (
 )
 
 type DepositReceived struct {
-	//BaseEvent events.BaseEvent
-	//EventID       string
 	TransactionID string
 	CustomerID    string
 	Amount        float64
@@ -19,7 +17,6 @@ type DepositReceived struct {
 func (DepositReceived) Key() string { return DepositReceivedEvent }
 
 type DepositProcessed struct {
-	//BaseEvent     events.BaseEvent
 	TransactionID string
 	Status        TransactionStatus
 	Gateway       string
@@ -28,7 +25,6 @@ type DepositProcessed struct {
 func (DepositProcessed) Key() string { return DepositProcessedEvent }
 
 type DepositCompleted struct {
-	//BaseEvent     events.BaseEvent
 	TransactionID string
 	Status        TransactionStatus
 	Gateway       string

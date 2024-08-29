@@ -72,7 +72,5 @@ func (h *DepositHandler) HandleDeposit(c *gin.Context) {
 		Status:        commandResponse.Status.String(),
 	}
 
-	//h.logger.LogTransaction(enum.DepositTransactionType, request, response)
-
 	c.JSON(http.StatusOK, response)
 }
